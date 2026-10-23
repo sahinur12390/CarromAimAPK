@@ -10,6 +10,7 @@ on:
 jobs:
   build:
     runs-on: ubuntu-22.04
+
     steps:
       - name: Checkout project
         uses: actions/checkout@v4
@@ -25,31 +26,23 @@ jobs:
         with:
           python-version: "3.11"
 
-      - name: Set up Android SDK tools
-        uses: android-actions/setup-android@v3
-
       - name: Install system dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y git zip unzip autoconf libtool pkg-config zlib1g-dev libncurses5-dev libncursesw5-dev cmake libffi-dev libssl-dev build-essential
+          sudo apt-get install -y git zip unzip autoconf libtool pkg-config zlib1g-dev libncurses-dev cmake libffi-dev libssl-dev
 
       - name: Install Buildozer
         run: |
-          python -m pip install --upgrade pip
-          python -m pip install "Cython==0.29.36" buildozer
-
-      - name: Install Android Build Tools
-        run: |
-          SDK="$HOME/.buildozer/android/platform/android-sdk"
-          yes | sdkmanager --sdk_root="$SDK" --licenses
-          sdkmanager --sdk_root="$SDK" "platform-tools" "platforms;android-36" "build-tools;36.0.0"
+          python -m pip install --upgrade pip setuptools
+          python -m pip install "cython==0.29.36" buildozer
 
       - name: Build Android APK
         run: buildozer android debug
 
-      - name: Save APK artifact
+      - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
           name: CarromAimAPK
           path: bin/*.apk
           if-no-files-found: error
+          
